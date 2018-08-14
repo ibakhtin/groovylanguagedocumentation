@@ -29,3 +29,12 @@ assert result == 'Found'
 
 // Elvis operator
 
+class User { String name }
+def user = new User()
+
+def displayName = user.name ? user.name : 'Anonymous'
+assert displayName == 'Anonymous'
+
+displayName = user.name ?: 'Anonymous'
+assert displayName == 'Anonymous'
+
