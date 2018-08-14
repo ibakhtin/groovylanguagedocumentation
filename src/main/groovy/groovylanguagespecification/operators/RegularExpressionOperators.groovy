@@ -26,11 +26,10 @@ if (!m) {
     throw new RuntimeException("Oops, text not found!")
 }
 
-//
+// Match operator
 
 m = text ==~ /match/
 assert m instanceof Boolean
 if (m) {
     throw new RuntimeException("Should not reach that point!")
 }
-
