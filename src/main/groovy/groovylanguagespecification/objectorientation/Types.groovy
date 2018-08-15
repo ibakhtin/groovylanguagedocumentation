@@ -401,3 +401,27 @@ import java.lang.annotation.RetentionPolicy
 
 // Closure annotation parameters
 
+@Retention(RetentionPolicy.RUNTIME)
+@interface OnlyIf {
+    Class value()
+}
+
+class Tasks {
+    Set result = []
+    void alwaysExecuted() {
+        result << 1
+    }
+    @OnlyIf({ jdk>=6 })
+    void supportedOnlyInJDK6() {
+        result << 'JDK 6'
+    }
+    @OnlyIf({ jdk>=7 && windows })
+    void requiresJDK7AndWindows() {
+        result << 'JDK 7 Windows'
+    }
+}
+
+// TODO
+// Add Meta-annotations
+
+//
