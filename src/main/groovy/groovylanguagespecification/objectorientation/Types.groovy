@@ -245,3 +245,159 @@ shouldFail(FileNotFoundException) {
 
 // Fields
 
+class Data {
+    private int id
+    protected String description
+    public static final boolean DEBUG = false
+}
+
+//
+
+class BadPractice {
+    private mapping
+}
+class GoodPractice {
+    private Map<String,String> mapping
+}
+
+// Properties
+
+// Groovy will then generate the getters/setters appropriately. For example:
+class Person2 {
+    String name
+    int age
+}
+
+// If a property is declared final, no setter is generated:
+class Person3 {
+    final String name
+    final int age
+    Person3(String name, int age) {
+        this.name = name
+        this.age = age
+    }
+}
+
+// Properties are accessed by name and will call the getter or setter
+// transparently, unless the code is in the class which defines the property:
+class Person4 {
+    String name
+    void name(String name) {
+        this.name = "Wonder$name"
+    }
+    String wonder() {
+        this.name
+    }
+}
+
+def p4 = new Person4()
+p4.name = 'Marge'
+assert p4.name == 'Marge'
+p4.name('Marge')
+assert p4.wonder() == 'WonderMarge'
+
+//
+
+class Person5 {
+    String name
+    int age
+}
+def p5 = new Person5()
+assert p5.properties.keySet().containsAll(['name','age'])
+
+//
+
+class PseudoProperties {
+    // a pseudo property "name"
+    void setName(String name) {}
+    String getName() {}
+
+    // a pseudo read-only property "age"
+    int getAge() { 42 }
+
+    // a pseudo write-only property "groovy"
+    void setGroovy(boolean groovy) {  }
+}
+def pp = new PseudoProperties()
+pp.name = 'Foo'
+assert pp.age == 42
+pp.groovy = true
+
+// Annotation
+
+// Annotation definition
+
+@interface SomeAnnotation1 {}
+
+//
+
+@interface SomeAnnotation2 {
+    String value()
+}
+@interface SomeAnnotation3 {
+    String value() default 'something'
+}
+@interface SomeAnnotation4 {
+    int step()
+}
+@interface SomeAnnotation5 {
+    Class appliesTo()
+}
+@interface SomeAnnotation6 {}
+@interface SomeAnnotations {
+    SomeAnnotation6[] value()
+}
+enum DayOfWeek { mon, tue, wed, thu, fri, sat, sun }
+@interface Scheduled {
+    DayOfWeek dayOfWeek()
+}
+
+// Annotation placement
+
+import java.lang.annotation.ElementType
+import java.lang.annotation.Target
+
+@Target([ElementType.METHOD, ElementType.TYPE])
+@interface SomeAnnotation7 {}
+
+// Annotation member values
+
+@interface Responce {
+    int statusCode()
+}
+
+@Responce(statusCode = 404)
+void someFunction() {
+    // ...
+}
+
+@interface Page {
+    String value()
+    int statusCode() default 200
+}
+
+@Page(value='/home')
+void home() {
+    // ...
+}
+
+@Page('/users')
+void userList() {
+    // ...
+}
+
+@Page(value='error',statusCode=404)
+void notFound() {
+    // ...
+}
+
+// Retention policy
+
+import java.lang.annotation.Retention
+import java.lang.annotation.RetentionPolicy
+
+@Retention(RetentionPolicy.SOURCE)
+@interface SomeAnnotation8 {}
+
+// Closure annotation parameters
+
