@@ -1,5 +1,7 @@
 package groovylanguagespecification.objectorientation
 
+import static groovy.test.GroovyAssert.shouldFail
+
 trait FlyingAbilityOne {
     String fly() { "I'm flying!" }
 }
@@ -219,3 +221,83 @@ dynamic.dynnamicProperty = 'bar'
 assert dynamic.dynnamicProperty == 'bar'
 assert dynamic.existingMethod() == 'ok'
 assert dynamic.someMethod() == 'SOMEMETHOD'
+
+// MULTIPLE INHERITANCE CONFLICTS
+
+// Default conflict resolution
+
+trait A {
+    String exec() { 'A' }
+}
+trait B {
+    String exec() { 'B' }
+}
+
+class C implements A, B {}
+
+def c = new C()
+assert c.exec() == 'B'
+
+// User conflict resolution
+
+class D implements A, B {
+    String exec() { A.super.exec() }
+}
+def d = new D()
+assert d.exec() == 'A'
+
+// RUNTIME IMPLEMENTATION OF TRAITS
+
+// Implementing a trait at runtime
+
+trait Extra {
+    String extra() { "I'm an extra method" }
+}
+class Something {
+    String doSomething() { 'Something' }
+}
+
+def somethingAsExtra = new Something() as Extra
+
+assert somethingAsExtra.extra() == "I'm an extra method"
+assert somethingAsExtra.doSomething() == 'Something'
+
+// Implementing multiple traits at once
+
+trait A1 { String methodFromA1() { 'A1' } }
+trait B1 { String methodFromB1() { 'B1' } }
+
+class C1 {}
+
+def c1 = new C1()
+
+shouldFail MissingMethodException, { c1.methodFromA() }
+shouldFail MissingMethodException, { c1.methodFromB() }
+
+def d1 = c1.withTraits A1, B1
+
+assert d1.methodFromA1() == 'A1'
+assert d1.methodFromB1() == 'B1'
+
+
+// CHAINING BEHAVIOR
+
+interface MessageHandler {
+    void on(String message, Map payload)
+}
+
+trait DefaultHandler implements MessageHandler {
+    void on(String message, Map payload) {
+        println "Received $message with payload $payload"
+    }
+}
+
+class SimpleHandler implements DefaultHandler {}
+
+class SimpleHandlerWithLogging implements DefaultHandler {
+    void on(String message, Map payload) {
+        println "Seeing $message with payload $payload"
+        DefaultHandler.super.on(message, payload)
+    }
+}
+
