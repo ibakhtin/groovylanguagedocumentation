@@ -301,3 +301,76 @@ class SimpleHandlerWithLogging implements DefaultHandler {
     }
 }
 
+new SimpleHandler().on('First Message', [one: 1])
+new SimpleHandlerWithLogging().on('Second Message', [two: 2])
+
+//
+
+trait LoggingHandler implements MessageHandler {
+    void on(String message, Map payload) {
+        println "Seeing $message with payload $payload"
+        super.on(message, payload)
+    }
+}
+
+class HandlerWithLogger implements DefaultHandler, LoggingHandler {}
+
+def handlerWithLogger = new HandlerWithLogger()
+handlerWithLogger.on('test logging', [:])
+
+trait SayHandler implements MessageHandler {
+    void on(String message, Map payload) {
+        if (message.startsWith("say")) {
+            println "I say ${message - 'say'}!"
+        } else {
+            super.on(message, payload)
+        }
+    }
+}
+
+class Handler implements DefaultHandler, SayHandler, LoggingHandler {}
+def handler = new Handler()
+handler.on('foo', [:])
+handler.on('sayHello', [:])
+
+//
+
+class AlternateHandler implements DefaultHandler, LoggingHandler, SayHandler {}
+def alternateHandler = new AlternateHandler()
+alternateHandler.on('foo', [:])
+alternateHandler.on('sayHello', [:])
+
+// Semantics of super inside a trait
+
+trait Filtering {
+    StringBuilder append(String str) {
+        def subst = str.replace('o','')
+        super.append(subst)
+    }
+    String toString() { super.toString() }
+}
+def sb = new StringBuilder().withTraits Filtering
+sb.append('Groovy')
+assert sb.toString() == 'Grvy'
+
+////
+
+class U {
+    String name, email
+}
+
+U.metaClass.static.new = {name, email ->
+    new U(name: name, email: email)
+}
+
+U.metaClass.updateName = { name ->
+    delegate.name = name
+}
+
+U u = U.new 'Igor', 'igor@bakhtin.eu'
+assert u.name == 'Igor'
+
+u.updateName 'Ivar'
+assert u.name == 'Ivar'
+
+////
