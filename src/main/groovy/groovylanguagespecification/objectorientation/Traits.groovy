@@ -353,24 +353,33 @@ def sb = new StringBuilder().withTraits Filtering
 sb.append('Groovy')
 assert sb.toString() == 'Grvy'
 
-////
+// ADVANCED FEATURES
 
-class U {
-    String name, email
+// SAM type coercion
+
+trait Greeter3 {
+    String greet() { "Hello $name" }
+    abstract String getName()
 }
 
-U.metaClass.static.new = {name, email ->
-    new U(name: name, email: email)
+void greet(Greeter3 greeter) { println greeter.greet() }
+greet { 'Alice' }
+
+import groovy.transform.CompileStatic
+import org.codehaus.groovy.control.CompilerConfiguration
+import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer
+import org.codehaus.groovy.control.customizers.ImportCustomizer
+
+class SomeTest extends GroovyTestCase {
+    def config
+    def shell
+
+    void setup() {
+        config = new CompilerConfiguration()
+        shell = new GroovyShell(config)
+    }
+    void testSomething() {
+        assert shell.evaluate('1+1') == 2
+    }
+    void otherTest() { /* ... */ }
 }
-
-U.metaClass.updateName = { name ->
-    delegate.name = name
-}
-
-U u = U.new 'Igor', 'igor@bakhtin.eu'
-assert u.name == 'Igor'
-
-u.updateName 'Ivar'
-assert u.name == 'Ivar'
-
-////
