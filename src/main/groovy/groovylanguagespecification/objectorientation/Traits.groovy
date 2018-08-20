@@ -365,6 +365,8 @@ trait Greeter3 {
 void greet(Greeter3 greeter) { println greeter.greet() }
 greet { 'Alice' }
 
+// Differences with Java 8 default methods
+
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer
@@ -383,3 +385,89 @@ class SomeTest extends GroovyTestCase {
     }
     void otherTest() { /* ... */ }
 }
+
+class PersonA {
+    String name
+}
+trait Bob {
+    String getName() { 'Bob' }
+}
+
+def personA = new PersonA(name: 'Alice')
+assert personA.name == 'Alice'
+def personAAsBob = personA as Bob
+assert personAAsBob.name == 'Bob'
+
+// Difference with mixins
+
+class A2 { String methodFromA2() { 'A2' } }
+class B2 { String methodFromB2() { 'B2' } }
+A2.metaClass.mixin B2
+def o = new A2()
+assert o.methodFromA2() == 'A2'
+assert o.methodFromB2() == 'B2'
+assert o instanceof A2
+assert !(o instanceof B2)
+
+// Inheritance of state gotchas
+
+trait IntCouple {
+    int x = 1
+    int y = 2
+    int sum() { x + y }
+}
+
+class BaseElem implements IntCouple {
+    int f() { sum() }
+}
+def base = new BaseElem()
+assert base.f() == 3
+
+//
+
+class Elem implements IntCouple {
+    int x = 3
+    int y = 4
+    int f() { sum() }
+}
+def elem = new Elem()
+assert elem.f() == 3
+
+trait IntCoupleTwo {
+    int x = 1
+    int y = 2
+    int sum() { getX() + getY() }
+}
+
+class Couple implements IntCoupleTwo {
+    int x = 3
+    int y = 4
+    int f() { sum() }
+}
+
+Couple couple = Couple.newInstance()
+assert couple.f() == 7
+
+// Self types
+
+// Type constraints on traits
+
+class CommunicationService {
+    static void sendMessage(String from, String to, String message) {
+        println "$from sent [$message] to $to"
+    }
+}
+
+class Device { String id }
+
+trait Communicating {
+    void sendMessage(Device to, String message) {
+        CommunicationService.sendMessage(id, to.id, message)
+    }
+}
+
+class MyDevice extends Device implements Communicating {}
+
+def bob = new MyDevice(id:'Bob')
+def alice = new MyDevice(id:'Alice')
+bob.sendMessage(alice,'secret')
