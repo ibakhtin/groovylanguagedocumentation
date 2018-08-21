@@ -1,5 +1,8 @@
 package groovylanguagespecification.objectorientation
 
+import groovy.transform.CompileStatic
+import groovy.transform.SelfType
+
 import static groovy.test.GroovyAssert.shouldFail
 
 trait FlyingAbilityOne {
@@ -457,8 +460,15 @@ class CommunicationService {
 
 class Device { String id }
 
+class SecurityService {
+    static void check(Device d) { if (d.id==null) throw new SecurityException() }
+}
+
+@SelfType(Device)
+@CompileStatic
 trait Communicating {
     void sendMessage(Device to, String message) {
+        SecurityService.check(this)
         CommunicationService.sendMessage(id, to.id, message)
     }
 }
@@ -468,4 +478,3 @@ class MyDevice extends Device implements Communicating {}
 def bob = new MyDevice(id:'Bob')
 def alice = new MyDevice(id:'Alice')
 bob.sendMessage(alice,'secret')
-
