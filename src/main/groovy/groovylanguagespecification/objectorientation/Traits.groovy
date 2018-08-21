@@ -175,7 +175,7 @@ trait Identified implements WithId, WithName {}
 
 class IdentifiedPerson implements Identified {}
 
-def identifiedPerson = new IdentifiedPerson(id: 100, name: 'Billy')
+Identified identifiedPerson = new IdentifiedPerson(id: 100, name: 'Billy')
 assert identifiedPerson.id == 100
 assert identifiedPerson.name == 'Billy'
 
@@ -367,10 +367,7 @@ greet { 'Alice' }
 
 // Differences with Java 8 default methods
 
-import groovy.transform.CompileStatic
 import org.codehaus.groovy.control.CompilerConfiguration
-import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer
-import org.codehaus.groovy.control.customizers.ImportCustomizer
 
 class SomeTest extends GroovyTestCase {
     def config
@@ -471,3 +468,4 @@ class MyDevice extends Device implements Communicating {}
 def bob = new MyDevice(id:'Bob')
 def alice = new MyDevice(id:'Alice')
 bob.sendMessage(alice,'secret')
+
