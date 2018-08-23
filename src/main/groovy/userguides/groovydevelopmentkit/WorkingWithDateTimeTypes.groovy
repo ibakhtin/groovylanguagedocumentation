@@ -16,8 +16,3 @@ assert time == LocalTime.of(4, 45, 0)
 
 def offsetTime = OffsetTime.parse('09:47:51-1234', 'HH:mm:ssZ')
 assert offsetTime == OffsetTime.of(9, 47, 51, 0, ZoneOffset.ofHoursMinutes(-12, -34))
-
-def start = System.nanoTime()
-def stop = System.nanoTime()
-
-println stop - start
